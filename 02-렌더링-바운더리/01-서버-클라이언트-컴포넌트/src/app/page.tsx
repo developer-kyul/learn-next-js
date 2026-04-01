@@ -1,5 +1,7 @@
 import { cn } from '@/utils'
 import ProjectName from '@/components/project-name'
+import ServerComponent from '@/_learn/ui/server-component'
+import { ClientComponent } from '@/_learn'
 
 // 서버 컴포넌트 (Server Component)
 export default function MainPage() {
@@ -33,6 +35,8 @@ export default function MainPage() {
       <main>
         {/* 클라이언트 컴포넌트 */}
         <ProjectName />
+        <ServerComponent />
+        <ClientComponent />
       </main>
     </div>
   )
