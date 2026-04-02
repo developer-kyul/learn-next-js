@@ -1,9 +1,10 @@
 'use client'
+// 안 좋은 예시
+
 
 import { useEffect, useState, useTransition } from 'react'
 import { readLikes, writeLikes } from '@/functions/likes-read-write' // 서버 함수
 import { cn, isErrorObject } from '@/utils'
-
 
 export default function ReudcingJSBundleSize() {
   const [likes, setLikes] = useState(0)
@@ -38,7 +39,7 @@ export default function ReudcingJSBundleSize() {
     <div
       className={cn(
         'bg-background flex min-h-screen',
-        'flex-col items-center justify-center gap-5'
+        'flex-col items-center justify-center gap-5',
       )}
     >
       <header>
@@ -77,7 +78,8 @@ export default function ReudcingJSBundleSize() {
               className={cn(
                 'flex cursor-pointer items-center gap-2 rounded-full border border-rose-200 bg-rose-50',
                 'px-6 py-2 text-rose-600 transition-all hover:bg-rose-100 active:scale-97',
-                isPending && 'cursor-not-allowed opacity-60 grayscale-100 active:scale-100',
+                isPending &&
+                  'cursor-not-allowed opacity-60 grayscale-100 active:scale-100',
               )}
             >
               <span>{isPending ? '⏳' : '❤️'}</span>
@@ -87,7 +89,10 @@ export default function ReudcingJSBundleSize() {
               데이터 = {likes}
             </p>
             <p className="mt-6 font-mono text-xs text-gray-400">
-              렌더링 타임 = <time dateTime={renderedTime}>{renderedTime}</time>
+              렌더링 타임 ={' '}
+              <time suppressHydrationWarning dateTime={renderedTime}>
+                {renderedTime}
+              </time>
             </p>
           </div>
         </section>
