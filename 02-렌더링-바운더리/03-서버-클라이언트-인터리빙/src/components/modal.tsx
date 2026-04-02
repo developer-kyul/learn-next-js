@@ -79,9 +79,9 @@ export default function Modal({ children }: Props) {
 
       {/* Vue.js v-show 디렉티브(지시어) (DOM에 있음 감춰줬을 뿐) */}
       {/* <Activity mode={isShow ? 'visible' : 'hidden'}> */}
-      {/* {modalElement} */}
+        {/* {modalElement} */}
 
-      {/* <div
+        {/* <div
           data-dim="액티비티"
           className={cn(
             'fixed inset-0 z-50 flex items-center justify-center',
