@@ -1,8 +1,6 @@
-import PassingData from '@/_learn/ui/passing-data'
 import { cn } from '@/utils'
 
-export default function HomePage() {
-  
+export default function Page() {
   return (
     <div
       className={cn(
@@ -17,19 +15,19 @@ export default function HomePage() {
             'selection:bg-foreground selection:text-background',
           )}
         >
-          데이터 전달
+          써드 파티 라이브러리
           <br />
           <span
             lang="en"
             className="inline-block -translate-y-2.5 text-xl text-slate-500"
           >
-            Passing Data
+            Third Party Library Interleaving
           </span>
         </h1>
       </header>
 
       <main>
-        <PassingData />
+        
       </main>
     </div>
   )

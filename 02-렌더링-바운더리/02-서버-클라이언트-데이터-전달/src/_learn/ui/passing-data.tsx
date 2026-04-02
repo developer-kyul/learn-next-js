@@ -19,6 +19,9 @@ export default async function PassingData() {
   // 서버 함수 readLikes()를 실행해
   // 결과 값을 클라이언트 컴포넌트에 전달
   const currentLikes = await readLikes()
+  
+  // 서버에서 렌더링된 날짜 정보
+  const renderedTime = new Date().toISOString()
 
   return (
     <section className="flex flex-col items-center justify-center p-24">
@@ -39,6 +42,9 @@ export default async function PassingData() {
 
         <p className="mt-6 font-mono text-xs text-gray-400">
           서버 사이드 데이터 = {currentLikes}
+        </p>
+        <p className="mt-6 font-mono text-xs text-gray-400">
+          서버 렌더링 타임 = <time dateTime={renderedTime}>{renderedTime}</time>
         </p>
       </div>
     </section>
