@@ -2,7 +2,11 @@
 
 import { useState } from 'react'
 import { ReactQueryDevtools } from '@tanstack/react-query-devtools'
-import { QueryClient, QueryClientProvider, environmentManager } from '@tanstack/react-query'
+import {
+  QueryClient,
+  QueryClientProvider,
+  environmentManager,
+} from '@tanstack/react-query'
 
 /**
  * @function makeQueryClient
@@ -42,7 +46,7 @@ let browserQueryClient: QueryClient | undefined = undefined
  * @function getQueryClient
  * @description 실행 환경(Server vs Client)에 따라 최적화된 인스턴스를 반환합니다.
  */
-function getQueryClient() {
+export function getQueryClient() {
   if (environmentManager.isServer()) {
     /**
      * [서버 환경: Isolation]
