@@ -2,8 +2,7 @@ import { cn } from '@/utils'
 import { UserList } from './user-list'
 
 export default async function Users() {
-  console.log(process.env.API_URL)
-
+  
   return (
     <section className="mx-auto max-w-md space-y-8 p-8">
       <header className="space-y-4">
