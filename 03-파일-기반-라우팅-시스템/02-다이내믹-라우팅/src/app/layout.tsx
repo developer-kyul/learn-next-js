@@ -8,7 +8,6 @@ import SiteInfo from '@/components/ui/site-info'
 import '@/styles/globals.css'
 import { QueryProvider } from './contexts/query-context'
 
-
 const notoSansKR = Noto_Sans_KR({ variable: '--font-noto' })
 
 export const metadata: Metadata = {
@@ -16,7 +15,7 @@ export const metadata: Metadata = {
   description: '현대적인 웹 경험을 위한 Next.js 프레임워크 학습 플랫폼',
 }
 
-export default function RootLayout({ children }: React.PropsWithChildren) {
+export default function RootLayout({ children }: LayoutProps<'/'>) {
   return (
     <html lang="ko-KR">
       <body
@@ -27,15 +26,13 @@ export default function RootLayout({ children }: React.PropsWithChildren) {
           'bg-background text-foreground antialiased',
           'selection:bg-foreground selection:text-background',
           'focus:outline-none',
-          '[&_*:focus-visible]:ring-2 [&_*:focus-visible]:ring-foreground [&_*:focus-visible]:ring-offset-2',
-          '[&_*:focus-visible]:ring-offset-background'
+          '[&_*:focus-visible]:ring-foreground [&_*:focus-visible]:ring-2 [&_*:focus-visible]:ring-offset-2',
+          '[&_*:focus-visible]:ring-offset-background',
         )}
       >
         <QueryProvider hideDevtools>
           <Navbar />
-          <main className={cn('container mx-auto px-6 grow')}>
-            {children}
-          </main>
+          <main className={cn('container mx-auto grow px-6')}>{children}</main>
           <SiteInfo />
         </QueryProvider>
       </body>
