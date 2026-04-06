@@ -17,6 +17,9 @@ export default async function BookDetailPage({ params }: Props) {
     (book) => book.title === decodedTitle && book.pubdate === pubdate,
   )
 
+  // 서버에서 찾은 도서가 있는지 여부 확인
+  console.log(book)
+
   // 도서를 찾을 수 없으면 Not Found 페이지로 이동
   if (!book) notFound()
 
