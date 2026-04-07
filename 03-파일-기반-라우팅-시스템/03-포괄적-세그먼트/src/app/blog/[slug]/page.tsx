@@ -1,20 +1,59 @@
-'use client'
+import Link from 'next/link'
+import { Fragment } from 'react'
+import { LucideChevronRight, LucideHome } from 'lucide-react'
 
-// import { use } from 'react'
-import { useParams } from 'next/navigation'
+import { cn } from '@/utils'
 
-// 페이지 컴포넌트가 클라이언트 컴포넌트인 경우
-// 라우트 다이내믹(동적) 세그먼트를 사용했을 때
-export default function BlogPostPage() {
-  // { params }: PageProps<'/blog/[slug]'>
-  // 클라이언트 컴포넌트이므로 비동기(async) 컴포넌트로 사용할 수 없음
-  // 이런 경우, 동적 세그먼트 값을 읽으려면 두 가지 방법이 있음
-  // 방법 1. React.use() 함수 활용
-  // const { slug } = use(params)
+export default async function FundamentalPage({
+  params,
+}: PageProps<'/docs/[...subjects]'>) {
+  // subjects = URL에 인코딩된 한글 경로를 포함하는 배열
+  const { subjects } = await params
 
-  // 방법 2. Next.js의 useParams 훅 함수 활용
-  const pageParams = useParams<{ slug: string }>()
-  console.log(pageParams.slug)
+  // decodedSubjects = 디코딩한 한글 경로를 포함하는 배열
+  const decodedSubjects = subjects.map((subject) => decodeURIComponent(subject))
+  // console.log(decodedSubjects)
 
-  return <>{pageParams.slug}</>
+  // 현재 페이지의 제목
+  const lastSubjectTitle = decodedSubjects.at(-1)?.replace(/-/g, ' ')
+
+  return (
+    <section className="w-full space-y-12">
+      {/* 상대 경로 안내 (Breadcrumbs) */}
+      <nav className="flex h-10 items-center gap-x-1 font-bold text-slate-400">
+        <Link
+          href={`/docs/${encodeURIComponent('기초')}`}
+          className={cn(
+            'flex shrink-0 items-center gap-x-1.5',
+            'transition-colors hover:text-blue-600',
+          )}
+        >
+          <LucideHome className="size-4" /> 학습 문서 홈
+        </Link>
+        {decodedSubjects.map((subject, index) => {
+          const isLast = index === decodedSubjects.length - 1
+          const href = `/docs/${subjects.slice(0, index + 1).join('/')}`
+
+          return (
+            <Fragment key={index}>
+              <LucideChevronRight className="size-4 shrink-0 text-slate-400" />
+              <Link
+                href={href}
+                className={cn(
+                  'rounded-full border px-4 py-1 transition-all',
+                  isLast
+                    ? 'border-blue-600 bg-blue-600 text-white shadow-md'
+                    : 'border-transparent hover:bg-blue-50 hover:text-blue-500',
+                )}
+              >
+                {subject.replace(/-/g, ' ')}
+              </Link>
+            </Fragment>
+          )
+        })}
+      </nav>
+
+      <h1 className="text-4xl font-black">{lastSubjectTitle}</h1>
+    </section>
+  )
 }
