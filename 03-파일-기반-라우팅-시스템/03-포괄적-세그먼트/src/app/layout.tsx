@@ -57,12 +57,12 @@ export default function RootLayout({ children }: React.PropsWithChildren) {
       <body
         className={cn(
           notoSansKR.variable,
-          'min-h-screen overflow-y-scroll',
+          'min-h-screen overflow-y-scroll', 
           'flex flex-col bg-white font-sans text-slate-900 antialiased',
         )}
       >
         <Navbar />
-        <main className="mx-auto flex w-full max-w-5xl grow flex-col px-6 py-8 lg:py-12">
+        <main className="mx-auto flex w-full grow max-w-5xl flex-col px-6 py-8 lg:py-12">
           {children}
         </main>
         <Footer />
