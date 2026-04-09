@@ -1,7 +1,10 @@
+import { Suspense } from 'react'
 import { LucideInfo, LucideZap } from 'lucide-react'
 
 import { type Pokemon } from '@/types/pokemon'
-import { PokemonList } from './_resources/pokemon-list'
+import { PokemonSkeleton } from './_resources/pokemon-skeleton'
+import PokemonViewServer from './pokemon-view/server'
+import PokemonViewClient from './pokemon-view/client'
 
 async function getPokemons(): Promise<Pokemon[]> {
   const response = await fetch(`${process.env.NEXT_PUBLIC_MOCK_API_URL}/pokemon`)
@@ -11,9 +14,8 @@ async function getPokemons(): Promise<Pokemon[]> {
 
 export default async function ServerStreamingPage() {
   
-  // 서버에서 Promise를 생성 (await 하지 않음)
-  const pokemons = await getPokemons()
-
+  const pokemonsPromise = getPokemons() // 기다리지 않고 Promise 바로 반환
+  
   return (
     <section className="m-6 space-y-6 md:mx-0">
       <header className="border-b border-b-slate-200 pb-4">
@@ -28,9 +30,16 @@ export default async function ServerStreamingPage() {
       </header>
 
       {/* Suspense가 Promise의 상태를 감지하여 fallback을 보여줍니다. */}
-      {/* 서버 컴포넌트 */}
+      
       {/* 클라이언트 컴포넌트 */}
-      <PokemonList data={pokemons} />
+      <Suspense fallback={<PokemonSkeleton />}>
+        <PokemonViewClient pokemonsPromise={pokemonsPromise} />
+      </Suspense>
+      
+      {/* 서버 컴포넌트 */}
+      <Suspense fallback={<PokemonSkeleton />}>
+        <PokemonViewServer pokemonsPromise={pokemonsPromise} />
+      </Suspense>
     </section>
   )
 }
