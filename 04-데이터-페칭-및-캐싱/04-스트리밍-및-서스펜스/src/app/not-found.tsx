@@ -6,9 +6,7 @@ export default function NotFound() {
     <section className="flex min-h-[70vh] flex-col items-center justify-center p-8">
       <div className="w-full max-w-md space-y-6 text-center">
         <div className="space-y-2">
-          <h1 className="text-6xl font-extrabold tracking-tighter">
-            404
-          </h1>
+          <h1 className="text-6xl font-extrabold tracking-tighter">404</h1>
           <h2 className="text-3xl font-bold tracking-tight">
             페이지를 찾을 수 없습니다
           </h2>
