@@ -1,6 +1,6 @@
 'use client'
 
-import { LucideMousePointer2, LucideServer } from 'lucide-react'
+import { LucideDatabase, LucideHourglass, LucideMousePointer2, LucideServer } from 'lucide-react'
 import Link from 'next/link'
 import { usePathname } from 'next/navigation'
 
@@ -11,7 +11,9 @@ export function Navbar() {
 
   // 활성화 여부 확인 (하위 경로 포함)
   const isClient = pathname.startsWith('/client')
-  const isServer = pathname.startsWith('/server')
+  const isServer = pathname === '/server-side'
+  const isUse = pathname.endsWith('with-use')
+  const isORM = pathname.startsWith('/orm')
 
   return (
     <nav
@@ -66,8 +68,56 @@ export function Navbar() {
                 isServer ? 'text-emerald-600' : 'text-slate-400',
               )}
             />
+            <span>서버 사이드</span>
+          </Link>
+
+          <Link
+            href="/orm-database"
+            className={cn(
+              'flex items-center gap-1.5 rounded-full border px-4 py-2 transition-all duration-200',
+              isORM
+                ? 'border-rose-100 bg-rose-50 text-rose-600 shadow-sm'
+                : 'border-transparent text-slate-500 hover:bg-rose-50/50 hover:text-rose-600',
+            )}
+          >
+            <LucideDatabase
+              className={cn(
+                'h-4 w-4',
+                isORM ? 'text-rose-600' : 'text-slate-400',
+              )}
+            />
             <span>
-              서버 사이드
+              <abbr
+                className="cursor-help no-underline"
+                title="Object.relational Mapping"
+              >
+                ORM
+              </abbr>
+            </span>
+          </Link>
+          
+          <Link
+            href="/server-side-with-use"
+            className={cn(
+              'flex items-center gap-1.5 rounded-full border px-4 py-2 transition-all duration-200',
+              isUse
+                ? 'border-amber-100 bg-amber-50 text-amber-600 shadow-sm'
+                : 'border-transparent text-slate-500 hover:bg-amber-50/50 hover:text-amber-600',
+            )}
+          >
+            <LucideHourglass
+              className={cn(
+                'h-4 w-4',
+                isUse ? 'text-amber-600' : 'text-slate-400',
+              )}
+            />
+            <span>
+              <abbr
+                className="cursor-help no-underline"
+                title="Object.relational Mapping"
+              >
+                use API
+              </abbr>
             </span>
           </Link>
         </div>

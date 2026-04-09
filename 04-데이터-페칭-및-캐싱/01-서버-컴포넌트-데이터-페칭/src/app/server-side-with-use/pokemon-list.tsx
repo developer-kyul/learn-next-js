@@ -1,14 +1,16 @@
-import { LucideHash } from 'lucide-react'
+'use client' // 클라이언트 디렉티브
 
-import { Pokemon } from '@/types/pokemon'
-import { cn } from '@/utils'
+import { LucideHash } from "lucide-react"
 
-export function PokemonList({ data }: { data: Pokemon[] }) {
-  if (!data || data.length === 0) {
-    return (
-      <div className="py-10 text-center text-slate-400">데이터가 없습니다.</div>
-    )
-  }
+import { Pokemon } from "@/types/pokemon"
+import { cn } from "@/utils"
+import { use } from "react"
+
+
+export function PokemonList({ pokemonsPromise }: { pokemonsPromise: Promise<Pokemon[]> }) {
+  
+  // 전달된 Promise가 resolved 된 후, 데이터로 렌더링만 신경쓰면 됩니다. (관심사 분리)
+  const data = use(pokemonsPromise)
 
   return (
     <div className="grid grid-cols-1 gap-4 sm:grid-cols-2 lg:grid-cols-3">
