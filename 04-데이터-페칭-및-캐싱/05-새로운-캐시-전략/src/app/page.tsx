@@ -3,12 +3,12 @@ import LinkCard from '@/components/ui/link-card'
 import { cn } from '@/utils'
 
 /**
- * [Next.js 15/16 새로운 캐시 전략]
- * 
+ * [Next.js 16 새로운 캐시 전략]
+ *
  * 'use cache' 지시어 (cache-directive)
- * - 함수나 파일 상단에 선언하여 해당 로직의 결과값을 캐싱합니다.
+ * - 함수나 컴포넌트 파일 상단에 선언하여 해당 로직의 결과값을 캐싱합니다.
  * - 기존의 복잡한 fetch 옵션이나 unstable_cache를 대체하는 직관적인 방식입니다.
- * 
+ *
  * 정교한 캐시 제어 (cache-control)
  * - cacheLife: 캐시의 유효 기간을 프로필(seconds, minutes, days 등) 기반으로 설정합니다.
  * - cacheTag: 특정 태그를 부여하여 나중에 정밀하게 캐시를 무효화(revalidate) 가능합니다.
@@ -21,8 +21,9 @@ export default function NewCacheStrategyPage() {
         <h1 className="mb-4 text-3xl font-black tracking-tight text-slate-900 md:text-4xl">
           Next.js 16의 새로운 캐시 전략
         </h1>
-        <p className="text-lg leading-relaxed text-muted-foreground">
-          기존의 복잡한 캐싱 설정을 넘어, 선언적이고<br className="hidden md:block" />
+        <p className="text-muted-foreground text-lg leading-relaxed">
+          기존의 복잡한 캐싱 설정을 넘어, 선언적이고
+          <br className="hidden md:block" />
           직관적인 차세대 캐싱 시스템을 학습합니다.
         </p>
       </header>

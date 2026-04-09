@@ -1,5 +1,4 @@
-import { Suspense } from 'react'
-import { Copyright } from '@/app/copyright/cached-function'
+import { Copyright } from '@/app/copyright/cached-component'
 
 export default async function Footer() {
   return (
@@ -7,9 +6,7 @@ export default async function Footer() {
       lang="en"
       className="border-t border-slate-100 py-8 text-center text-xs text-slate-400"
     >
-      <Suspense>
-        <Copyright />
-      </Suspense>
+      <Copyright />
     </footer>
   )
 }
