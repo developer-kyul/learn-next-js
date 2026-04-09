@@ -5,21 +5,21 @@ import { cn } from '@/utils'
 
 /**
  * [Next.js 16 렌더링 전략 및 재검증]
- * 
- * 정적 렌더링 (Static Rendering) — 기본
+ *
+ * 정적 렌더링 (Static Rendering) — 기본 (default)
  * - 특징: 빌드 시점에 딱 한 번 생성
  * - 장점: 속도가 가장 빠름 (CDN 캐싱)
  * - 용도: 변하지 않는 소개 페이지, 블로그 포스트 등
  * - 설정: export const dynamic = 'force-static'
  * - 참고: https://nextjs.org/docs/app/guides/caching-without-cache-components#route-segment-config
- * 
+ *
  * 동적 렌더링 (Dynamic Rendering)
  * - 특징: 요청이 올 때마다 서버에서 새로 생성
  * - 장점: 항상 최신 데이터, 개인화된 정보(로그인 등) 제공 가능
  * - 용도: 마이페이지, 실시간 대시보드 등
  * - 설정: export const dynamic = 'force-dynamic'
  * - 참고: https://nextjs.org/docs/app/guides/caching-without-cache-components#dynamic
- * 
+ *
  * 시간 기반 재검증 설정 (Time-based Revalidation / ISR)
  * - 특징: 정적 페이지를 유지하되, 설정한 주기(예: 60초)마다 백그라운드에서 갱신
  * - 장점: 정적의 속도 + 동적의 최신성을 절충
