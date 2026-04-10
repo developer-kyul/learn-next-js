@@ -1,7 +1,7 @@
 'use client'
 
 import { useCallback, useState } from 'react'
-import { CreateActionForm } from './_components/create-action-form'
+import { CreateActionForm } from './create-action-form'
 
 export default function ClientSidePage() {
   const [resetKey, setResetKey] = useState(0)
