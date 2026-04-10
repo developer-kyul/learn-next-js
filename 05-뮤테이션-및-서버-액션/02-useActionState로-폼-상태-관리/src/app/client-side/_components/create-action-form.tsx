@@ -5,7 +5,7 @@ import { createItemAction } from '@/actions/create-item-action'
 import { useInput } from '@/hooks'
 import { cn } from '@/utils'
 
-import { CreateItemButton } from './create-item-button.tsx'
+import { CreateItemButton } from './create-item-button'
 import { SuccessScreen } from './success-screen'
 import { FormInfo } from './form-info'
 
