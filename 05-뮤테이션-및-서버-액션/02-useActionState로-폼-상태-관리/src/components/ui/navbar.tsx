@@ -28,7 +28,7 @@ export function Navbar() {
             'transition-opacity hover:opacity-80',
           )}
         >
-          서버 액션 기초
+          useActionState로 폼 상태 관리
         </Link>
 
         <div className="flex items-center gap-3 text-sm font-bold">
@@ -48,7 +48,7 @@ export function Navbar() {
                 isClientActive ? 'text-blue-600' : 'text-slate-400',
               )}
             />
-            <span>클라이언트 사이드</span>
+            클라이언트 <span className='hidden md:inline'>사이드</span>
           </Link>
 
           {/* 서버 사이드 링크 */}
@@ -67,7 +67,7 @@ export function Navbar() {
                 isServerAction ? 'text-emerald-600' : 'text-slate-400',
               )}
             />
-            <span>서버 사이드</span>
+            서버 <span className='hidden md:inline'>사이드</span>
           </Link>
         </div>
       </div>

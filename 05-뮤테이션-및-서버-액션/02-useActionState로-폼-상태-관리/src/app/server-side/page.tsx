@@ -1,31 +1,24 @@
-import { LucideSend, LucideArrowRight } from 'lucide-react'
 import { redirect } from 'next/navigation'
+import { LucideSend, LucideArrowRight } from 'lucide-react'
 
-import { createItemAction } from '@/server-actions/create-item-action'
+import { createItemAction } from '@/actions'
 import { cn } from '@/utils'
 
-// 서버 컴포넌트
 export default async function ServerSidePage({ searchParams }: PageProps<'/server-side'>) {
   
-  // 에러 제어를 위한 변수
-  const { error } = await searchParams // ?error=error-message
+  const { error } = await searchParams
 
-  // 인라인 서버 함수 작성
-  // <form> 요소의 action 속성에 연결된 함수 (반환값이 없어야 함)
-  const handleInlineServerAction = async (formData: FormData) => {
+  const inlineServerAction = async (formData: FormData) => {
     'use server'
 
-    // 클라이언트 측과 공유하는 서버 함수를 실행 (결과 값이 필요해서)
-    const result = await createItemAction(formData)
+    const result = await createItemAction(formData, true)
 
     if (!result.success) {
-      // 에러 상황
-      redirect(`?error=${encodeURIComponent(result.error ?? '알 수 없는 오류')}`, 'replace')
-    } else {
-      // 성공 상황
-      // 아이템 성공 페이지로 리디렉션
-      redirect('/action-success', 'push')
+      const redirectUrl = `/server-side?error=${encodeURIComponent(result.error ?? 'true')}`
+      redirect(redirectUrl)
     }
+
+    console.error({ result })
   }
 
   return (
@@ -60,9 +53,15 @@ export default async function ServerSidePage({ searchParams }: PageProps<'/serve
           </h1>
           <p className="mb-8 leading-relaxed text-slate-500">
             서버 컴포넌트에서 직접 액션을 호출합니다.
-            <span className="block">
-              브라우저의 JS 없이도 작동하는 방식입니다.
-            </span>
+            {error ? (
+              <span className="block animate-pulse font-semibold text-red-500">
+                ⚠️ 전송 중 오류가 발생했습니다.
+              </span>
+            ) : (
+              <span className="block">
+                브라우저의 JS 없이도 작동하는 방식입니다.
+              </span>
+            )}
           </p>
 
           {/* 에러 메시지 표시 영역 */}
@@ -78,14 +77,7 @@ export default async function ServerSidePage({ searchParams }: PageProps<'/serve
           )}
         </div>
 
-        <form
-          // 서버 액션을 연결하세요.
-          // 반환 값이 있는 이유는 클라이언트 측의 UX 향상
-          // 문제 해결 방법 1. 비슷한 기능을 가진 다른 함수 작성
-          // 문제 해결 방법 2. 인라인 서버 함수 사용하는 것
-          action={handleInlineServerAction}
-          className="relative z-10 space-y-4"
-        >
+        <form action={inlineServerAction} className="relative z-10 space-y-4">
           <input
             name="title"
             required
