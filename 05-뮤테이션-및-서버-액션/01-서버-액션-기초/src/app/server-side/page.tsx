@@ -1,167 +1,119 @@
-'use client'
-
-import {
-  LucideArrowRight,
-  LucideLoader2,
-  LucideSparkles,
-  LucideAlertCircle,
-  LucideCheckCircle2,
-} from 'lucide-react'
-import { useState, useTransition } from 'react'
+import { LucideSend, LucideArrowRight } from 'lucide-react'
+import { redirect } from 'next/navigation'
 
 import { createItemAction } from '@/server-actions/create-item-action'
-import { useInput } from '@/hooks'
 import { cn } from '@/utils'
 
-export default function ClientSidePage() {
-  // 폼 상태를 클라이언트 측 메모리에 관리해보세요.
-  const [isPending, startTransition] = useTransition() // 서버 액션 요청 (로딩 상태 관리, 렌더링)
-  const [message, setMessage] = useState('') // 서버에서 성공 응답이 왔을 때 상태 업데이트 -> UI 반영 (성공 메시지)
-  const [error, setError] = useState<undefined | string>(undefined) // 서버에서 실패 응답이 왔을 때 상태 업데이트 -> UI 반영 (에러 메시지)
+// 서버 컴포넌트
+export default async function ServerSidePage({
+  searchParams,
+}: PageProps<'/server-side'>) {
+  // 에러 제어를 위한 변수
+  const { error } = await searchParams // ?error=error-message
 
-  const itemInput = useInput('')
-  const isNotInput = itemInput.props.value.trim().length === 0
+  // 인라인 서버 함수 작성
+  // <form> 요소의 action 속성에 연결된 함수 (반환값이 없어야 함)
+  const handleInlineServerAction = async (formData: FormData) => {
+    'use server'
 
-  // 서버 액션을 클라이언트 핸들러 내부에서 실행하는 코드를 작성하고
-  // 응답 성공 또는 실패 상황에 따라 UI 화면을 제공하도록 설정합니다.
-  const handleAction = (formData: FormData) => {
-    // 서버 함수는 startTransition 함수 안에서 실행하세요!
-    startTransition(async () => {
-      // 서버 함수에 formData 전달해 실행 후, 반환된 결과 받기
-      const result = await createItemAction(formData)
+    // 클라이언트 측과 공유하는 서버 함수를 실행 (결과 값이 필요해서)
+    const result = await createItemAction(formData)
 
-      if (result.success) {
-        // 서버의 응답 결과가 성공했을 때
-        setMessage(result.message ?? '요청이 성공적으로 수행되었습니다.')
-      } else {
-        // 서버의 응답 결과가 실패했을 때
-        setError(result.error ?? '알 수 없는 에러가 발생했습니다.')
-      }
-    })
+    if (!result.success) {
+      // 에러 상황
+      redirect(
+        `?error=${encodeURIComponent(result.error ?? '알 수 없는 오류')}`,
+        'replace',
+      )
+    } else {
+      // 성공 상황
+      // 아이템 성공 페이지로 리디렉션
+      redirect('/action-success', 'push')
+    }
   }
 
   return (
-    <div className="flex grow items-center justify-center p-4">
+    <div className="flex grow items-center justify-center">
       <div
         className={cn(
           'relative flex flex-col justify-between overflow-hidden',
-          'mx-auto min-h-87.5 w-full max-w-md p-10',
-          'rounded-[40px] border border-slate-100 bg-white',
-          'shadow-[0_8px_30px_rgb(0,0,0,0.04)] transition-all hover:shadow-xl',
+          'mx-auto w-full max-w-md p-10',
+          'min-h-87.5',
+          'rounded-[40px] border border-emerald-100 bg-white',
+          'shadow-[0_8px_30px_rgb(0,0,0,0.04)]',
+          'transition-all hover:shadow-xl',
         )}
       >
+        <div
+          role="presentation"
+          className="absolute -top-10 -right-10 h-40 w-40 rounded-full bg-emerald-50 opacity-60"
+        />
+
         <div className="relative z-10">
           <div
-            role="presentation"
             className={cn(
-              'mb-8 flex h-16 w-16 items-center justify-center rounded-2xl transition-colors duration-500',
-              message ? 'bg-green-50' : error ? 'bg-red-50' : 'bg-blue-50',
+              'mb-8 flex h-16 w-16 items-center justify-center rounded-2xl',
+              'bg-emerald-600 shadow-lg shadow-emerald-200',
             )}
           >
-            {message ? (
-              <LucideCheckCircle2 className="h-7 w-7 text-green-500" />
-            ) : error ? (
-              <LucideAlertCircle className="h-7 w-7 animate-pulse text-red-500" />
-            ) : (
-              <LucideSparkles className="h-7 w-7 text-blue-500" />
-            )}
+            <LucideSend className="h-7 w-7 -rotate-12 text-white" />
           </div>
 
-          <h1 className="mb-4 text-3xl font-bold tracking-tight text-slate-900">
-            클라이언트 사이드
+          <h1 className="mb-4 text-3xl font-bold text-slate-900">
+            서버 사이드
           </h1>
-
-          <p className="mb-6 text-sm leading-relaxed text-slate-500">
-            클라이언트 컴포넌트에서 상태를 직접 관리합니다.
-            <span className="mt-1 block font-medium text-slate-400">
-              #useTransition #useState
+          <p className="mb-8 leading-relaxed text-slate-500">
+            서버 컴포넌트에서 직접 액션을 호출합니다.
+            <span className="block">
+              브라우저의 JS 없이도 작동하는 방식입니다.
             </span>
           </p>
 
-          {!message ? (
-            <form
-              // 서버 액션을 연결해보세요.
-              action={handleAction}
-              className="relative z-10 space-y-4"
-              noValidate
-            >
-              <div className="space-y-2">
-                <input
-                  name="title"
-                  required
-                  aria-disabled={isPending}
-                  aria-invalid={!!error}
-                  {...itemInput.props}
-                  placeholder="아이템 이름 입력..."
-                  className={cn(
-                    'w-full rounded-2xl border bg-slate-50/50 p-4 transition-all outline-none',
-                    'placeholder:text-slate-400',
-                    error
-                      ? 'border-red-200 bg-red-50/30 focus:ring-2 focus:ring-red-500/20'
-                      : 'border-slate-100 focus:border-blue-500 focus:ring-2 focus:ring-blue-500/20',
-                    'aria-disabled:cursor-not-allowed aria-disabled:opacity-50',
-                  )}
-                />
-
-                {/* 에러 메시지 UI */}
-                {error && (
-                  <div className="animate-in fade-in slide-in-from-top-1 flex items-center gap-1.5 px-1 text-red-500">
-                    <LucideAlertCircle className="h-4 w-4" />
-                    <p role="alert" className="text-[13px] font-medium">
-                      {error}
-                    </p>
-                  </div>
-                )}
-              </div>
-
-              <button
-                type="submit"
-                // formAction={handleAction}
-                aria-disabled={isPending || isNotInput}
-                className={cn(
-                  'flex w-full items-center justify-center gap-2 rounded-2xl py-4 font-bold transition-all',
-                  'bg-blue-600 text-white hover:bg-blue-700 active:scale-[0.98]',
-                  'disabled:text-slate-400 aria-disabled:scale-100 aria-disabled:cursor-not-allowed aria-disabled:bg-slate-200',
-                )}
-              >
-                {isPending ? (
-                  <>
-                    <LucideLoader2 className="h-5 w-5 animate-spin" />
-                    <span>처리 중...</span>
-                  </>
-                ) : (
-                  <>
-                    <span>아이템 생성하기</span>
-                    <LucideArrowRight className="h-5 w-5" />
-                  </>
-                )}
-              </button>
-            </form>
-          ) : (
-            /* 성공 메시지 UI */
+          {/* 에러 메시지 표시 영역 */}
+          {error && (
             <div
-              aria-live="polite"
-              className="animate-in fade-in zoom-in-95 flex flex-col gap-6 duration-500"
+              role="alert"
+              className="animate-in fade-in slide-in-from-top-2 mb-3 rounded-2xl border border-red-100 bg-red-50 p-4"
             >
-              <div className="rounded-2xl border border-green-100 bg-green-50/50 p-4">
-                <p className="text-base leading-relaxed font-medium text-green-700">
-                  {message}
-                </p>
-              </div>
-              <button
-                type="button"
-                className={cn(
-                  'flex w-full items-center justify-center gap-2 rounded-2xl py-4 font-bold transition-all',
-                  'bg-blue-600 text-white hover:bg-blue-700 active:scale-[0.98]',
-                )}
-                // 폼 초기화 로직을 실행하는 핸들러를 연결해보세요.
-                // ...
-              >
-                새로운 아이템 추가
-              </button>
+              <p className="text-xs leading-snug font-medium text-red-600">
+                {error}
+              </p>
             </div>
           )}
         </div>
+
+        <form
+          // 서버 액션을 연결하세요.
+          // 반환 값이 있는 이유는 클라이언트 측의 UX 향상
+          // 문제 해결 방법 1. 비슷한 기능을 가진 다른 함수 작성
+          // 문제 해결 방법 2. 인라인 서버 함수 사용하는 것
+          action={handleInlineServerAction}
+          className="relative z-10 space-y-4"
+        >
+          <input
+            name="title"
+            required
+            placeholder="아이템 이름 입력..."
+            aria-invalid={!!error}
+            className={cn(
+              'w-full rounded-2xl border border-slate-200 bg-slate-50/50 p-4',
+              'transition-all outline-none focus:ring-2 focus:ring-emerald-500',
+              error
+                ? 'border-red-200 bg-red-50/50 focus:ring-2 focus:ring-red-500/20'
+                : 'border-slate-200 focus:ring-2 focus:ring-emerald-500',
+            )}
+          />
+          <button
+            type="submit"
+            className={cn(
+              '-translate-x-2 px-2 py-1',
+              'group mt-2 flex cursor-pointer items-center gap-2 font-bold text-emerald-600',
+            )}
+          >
+            <span>{error ? '다시 시도하기' : '서버 측 데이터 전송'}</span>{' '}
+            <LucideArrowRight className="h-4 w-4 transition-transform duration-400 group-hover:translate-x-1" />
+          </button>
+        </form>
       </div>
     </div>
   )

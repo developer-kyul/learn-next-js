@@ -9,7 +9,11 @@ import {
 } from 'lucide-react'
 import { useState, useTransition } from 'react'
 
-import { createItemAction } from '@/server-actions/create-item-action'
+import {
+  createItemAction,
+  // progressiveEnhancementAction
+} from '@/server-actions/create-item-action' // 서버 함수
+
 import { useInput } from '@/hooks'
 import { cn } from '@/utils'
 
@@ -24,7 +28,9 @@ export default function ClientSidePage() {
 
   // 서버 액션을 클라이언트 핸들러 내부에서 실행하는 코드를 작성하고
   // 응답 성공 또는 실패 상황에 따라 UI 화면을 제공하도록 설정합니다.
-  const handleAction = (formData: FormData) => {
+  const handleClientAction = (formData: FormData) => {
+    if (isPending || isNotInput) return // 방어적 프로그래밍
+
     // 서버 함수는 startTransition 함수 안에서 실행하세요!
     startTransition(async () => {
       // 서버 함수에 formData 전달해 실행 후, 반환된 결과 받기
@@ -38,6 +44,18 @@ export default function ClientSidePage() {
         setError(result.error ?? '알 수 없는 에러가 발생했습니다.')
       }
     })
+  }
+
+  // 입력 폼 초기화 함수
+  const handleReset = () => {
+    // 방법 1. 브라우저 API를 사용해 페이지를 새로고침(하드 내비게이션)
+    // window.location.reload()
+
+    // 방법 2. 리액트의 방식으로 컴포넌트 초기화
+    setError(undefined)
+    setMessage('')
+    itemInput.methods.reset()
+    setTimeout(() => itemInput.methods.focus(), 50) // 0.05초 뒤에 초점 이동
   }
 
   return (
@@ -71,7 +89,7 @@ export default function ClientSidePage() {
             클라이언트 사이드
           </h1>
 
-          <p className="mb-6 text-sm leading-relaxed text-slate-500">
+          <p className="text-md mb-6 leading-relaxed text-slate-500">
             클라이언트 컴포넌트에서 상태를 직접 관리합니다.
             <span className="mt-1 block font-medium text-slate-400">
               #useTransition #useState
@@ -80,8 +98,13 @@ export default function ClientSidePage() {
 
           {!message ? (
             <form
-              // 서버 액션을 연결해보세요.
-              action={handleAction}
+              // 실제 서버에서 실행되는 액션(함수)
+              // form 요소의 action에 연결된 서버 액션 함수는 반환 값이 없어야 한다.
+              // 점진적 향상 (Progressive EnhancementAction) 테스트
+              // action={progressiveEnhancementAction}
+
+              // 클라이언트 핸들러 (내부에서 서버 액션 실행)
+              action={handleClientAction}
               className="relative z-10 space-y-4"
               noValidate
             >
@@ -116,7 +139,6 @@ export default function ClientSidePage() {
 
               <button
                 type="submit"
-                // formAction={handleAction}
                 aria-disabled={isPending || isNotInput}
                 className={cn(
                   'flex w-full items-center justify-center gap-2 rounded-2xl py-4 font-bold transition-all',
@@ -156,6 +178,7 @@ export default function ClientSidePage() {
                 )}
                 // 폼 초기화 로직을 실행하는 핸들러를 연결해보세요.
                 // ...
+                onClick={handleReset}
               >
                 새로운 아이템 추가
               </button>
