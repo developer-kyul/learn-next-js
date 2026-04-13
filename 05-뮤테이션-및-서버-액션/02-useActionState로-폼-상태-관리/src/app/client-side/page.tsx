@@ -1,40 +1,26 @@
 'use client'
 
-import type { FormState } from '@/actions/create-item-action'
-import { cn } from '@/utils'
-import Link from 'next/link'
+import { useCallback, useRef, useState } from 'react'
+import { CreateActionForm } from './_components/create-action-form'
 
-interface Props {
-  state: FormState
-  onReset: () => void
-}
+export default function ClientSidePage() {
 
-export function SuccessScreen({ state, onReset }: Props) {
-  const handleRestore = (e: React.MouseEvent<HTMLAnchorElement>) => {
-    e.preventDefault()
-    onReset()
-  }
+  const imperativeHandleRef = useRef({
+    focus: () => {}
+  })
+
+  const [resetKey, setResetKey] = useState(0)
+
+  const handleReset = useCallback(() => {
+    setResetKey((key) => key + 1)
+    // 자식 컴포넌트의 명령형 핸들(함수) 실행
+    // 컴포넌트 초기화 한 후에 하위 컴포넌트의 인풋 요소에 초점 이동
+    setTimeout(() => imperativeHandleRef.current.focus(), 50)
+  }, [])
 
   return (
-    <div
-      aria-live="polite"
-      className="animate-in fade-in zoom-in-95 flex flex-col gap-6 duration-500"
-    >
-      <div className="rounded-2xl border border-green-100 bg-green-50/50 p-4">
-        <p className="text-base leading-relaxed font-medium text-green-700">
-          {state.message}
-        </p>
-      </div>
-      <Link
-        href="/client-side"
-        onClick={handleRestore}
-        className={cn(
-          'flex w-full items-center justify-center gap-2 rounded-2xl py-4 font-bold transition-all',
-          'bg-blue-600 text-white hover:bg-blue-700 active:scale-[0.98]',
-        )}
-      >
-        새로운 아이템 추가
-      </Link>
+    <div className="flex grow items-center justify-center p-4">
+      <CreateActionForm ref={imperativeHandleRef} key={resetKey} onReset={handleReset} />
     </div>
   )
 }

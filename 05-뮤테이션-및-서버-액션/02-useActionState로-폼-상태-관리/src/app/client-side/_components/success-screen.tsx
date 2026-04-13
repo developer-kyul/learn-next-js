@@ -10,6 +10,7 @@ interface Props {
 }
 
 export function SuccessScreen({ state, onReset }: Props) {
+
   const handleRestore = (e: React.MouseEvent<HTMLAnchorElement>) => {
     e.preventDefault()
     onReset()

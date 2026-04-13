@@ -10,6 +10,7 @@ interface Props {
 }
 
 export function CreateItemButton({ isPending, isNotInput }: Props) {
+
   const [isDisabled, setIsDisabled] = useState(false)
 
   useEffect(() => {
