@@ -8,7 +8,7 @@ export default function SupabaseSetupPage() {
       <section
         className={cn(
           'grid grid-cols-1 gap-8 md:grid-cols-2',
-          'mx-auto w-full max-w-4xl p-6 md:p-0'
+          'mx-auto w-full max-w-4xl p-6 md:p-0',
         )}
       >
         {/* 
@@ -33,7 +33,7 @@ export default function SupabaseSetupPage() {
         */}
         <LinkCard
           color="emerald"
-          href="/todo-list"
+          href="/read-table-data"
           title="테이블 데이터 조회"
           actionLabel="첫 데이터 불러오기"
           description="Supabase 대시보드에서 생성한 테이블의 데이터를 서버 컴포넌트에서 직접 조회하여 화면에 출력합니다."
