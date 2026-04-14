@@ -1,44 +1,70 @@
-import { Suspense } from 'react'
+import { redirect } from 'next/navigation'
 
-import { readMemoAction } from '@/actions/memo-actions'
-import { Spinner } from '@/components/ui/spinner'
-import MemoForm from './memo-form'
-import MemoList from './memo-list'
+import { createMemoAction } from '@/actions/memo-actions'
 
-export default async function MemoCRUDPage({
-  searchParams,
-}: PageProps<'/memos-crud'>) {
-  const { limit: limitParam } = await searchParams
+interface Props {
+  errorMessage?: string | string[]
+}
+
+export default async function MemoForm({ errorMessage }: Props) {
+  // 오류 원인
+  // 일반 서버 컴포넌트 (페이지 컴포넌트가 아님. 검색 매개변수 못 읽음)
+
+  // 오류 해결 방법
+  // 1. 서버 컴포넌트: 부모(페이지) 컴포넌트 -> 폼 컴포넌트 error prop 전달 ✅
+  // 2. 클라이언트 컴포넌트화 (useSearchParams 훅)
 
   /**
-   * readMemoAction 서버 액션을 정의합니다. (Supabase 데이터 가져오기)
-   * readMemoAction 액션를 실행한 Promise를 MemoList 컴포넌트에 전달합니다.
+   * createMemoAction 서버 액션을 정의합니다.
+   * createMemoAction 서버 액션을 <form> 요소의 action 속성에 연결합니다.
+   * 서버 컴포넌트에서 서버 액션을 처리하도록 구성하고, 생성과 동시에 화면이 업데이트되도록 구성합니다.
+   * 클라이언트 컴포넌트에서 각 필드마다 에러 메시지를 표시하도록 구성합니다.
    */
 
-  const limit = Number(limitParam)
-  const limitNumber = Number.isNaN(limit) ? undefined : limit
-  const memolistPromise = readMemoAction(limitNumber)
+  // 인라인 서버 액션 (Server Action)
+  const handleAction = async (formData: FormData) => {
+    'use server'
+
+    const result = await createMemoAction(formData)
+
+    if (!result.success) {
+      // Next.js의 서버 함수
+      // 페이지 리디렉션(redirection)
+      redirect(`?error=${encodeURIComponent(result.error)}`)
+    } else {
+      redirect('/memos-crud')
+    }
+  }
 
   return (
-    <section className="mx-auto w-9/10 max-w-3xl px-6 py-12 antialiased lg:w-3/5">
-      <header className="mb-10 flex items-center justify-between">
-        <div className="flex flex-col gap-1">
-          <h1 className="text-2xl font-bold text-slate-900">
-            메모 <abbr>CRUD</abbr>
-          </h1>
-          <p className="text-sm text-slate-500">
-            생성(Create) / 조회(Read) / 수정(Update) / 삭제(Delete)
-          </p>
-        </div>
-      </header>
-
-      <div className="mb-12 rounded-3xl border-2 border-slate-100 bg-slate-50/50 p-6">
-        <MemoForm />
-      </div>
-
-      <Suspense fallback={<Spinner />}>
-        <MemoList memolistPromise={memolistPromise} />
-      </Suspense>
-    </section>
+    <form action={handleAction} className="flex flex-col gap-3">
+      <input
+        type="text"
+        name="title"
+        aria-label="메모 제목"
+        placeholder="메모 제목 (2글자 이상 입력)"
+        required
+        className="rounded-xl border border-slate-200 px-4 py-2"
+      />
+      <textarea
+        name="content"
+        aria-label="메모 내용"
+        placeholder="메모 내용 작성 (최대 100글자)"
+        required
+        rows={3}
+        className="min-h-40 rounded-xl border border-slate-200 px-4 py-2"
+      />
+      <button
+        type="submit"
+        className="cursor-pointer rounded-xl bg-slate-900 py-2.5 font-bold text-white"
+      >
+        메모 저장
+      </button>
+      {errorMessage && errorMessage.length > 0 && (
+        <p role="alert" className="px-3 py-1 font-medium text-red-700">
+          {decodeURIComponent(errorMessage?.toString())}
+        </p>
+      )}
+    </form>
   )
 }
