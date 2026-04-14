@@ -1,10 +1,10 @@
 'use server'
 
+import z from 'zod'
 import { revalidatePath } from 'next/cache'
 
 import { getErrorMessage } from '@/utils'
 import { createSupabase } from '@/lib/supabase/helpers'
-import z from 'zod'
 
 /* DB 테이블 이름 및 갱신할 페이지 경로 정의 ------------------------------------------- */
 
@@ -163,7 +163,7 @@ export const readMemoAction = async (
 export const updateMemoAction = async (
   memoId: Memo['id'],
   updateMemo: MemoUpdate,
-) => {
+): Promise<ActionResponse<Memo>> => {
   // 서버 측 유효성 검사: 예측 가능한 에러 (사용자 실수)
   // Zod를 사용한 입력 값 검증(Safe Parse -> Validation)
   const result = MemoSchema.safeParse(updateMemo)
@@ -211,7 +211,36 @@ export const updateMemoAction = async (
 }
 
 // [DELETE] 특정 메모를 삭제합니다.
-export const deleteMemoAction = async () => {}
+export const deleteMemoAction = async (
+  memoId: Memo['id'],
+): Promise<ActionResponse<null>> => {
+  if (!memoId) {
+    return {
+      success: false,
+      error: '삭제할 메모 ID가 없습니다.',
+    }
+  }
+
+  try {
+    const supabase = await createSupabase()
+    const { error } = await supabase.from(DB_NAME).delete().eq('id', memoId)
+
+    if (error) throw error
+
+    revalidatePath(REVALIDATE_PATH)
+
+    return {
+      success: true,
+      data: null,
+    }
+  } catch (error) {
+    console.error('메모 삭제 실패', getErrorMessage(error))
+    return {
+      success: false,
+      error: '메모 삭제에 실패했습니다.',
+    }
+  }
+}
 
 /* -------------------------------------------------------------------------- */
 

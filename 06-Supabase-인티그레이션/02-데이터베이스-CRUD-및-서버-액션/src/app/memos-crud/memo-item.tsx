@@ -1,70 +1,160 @@
-import { redirect } from 'next/navigation'
+'use client'
 
-import { createMemoAction } from '@/actions/memo-actions'
+import { useState, startTransition } from 'react'
+import {
+  LucideStickyNote,
+  LucideCalendar,
+  LucideTrash2,
+  LucideEdit3,
+  LucideCheck,
+  LucideX,
+} from 'lucide-react'
+
+import { cn } from '@/utils'
+import {
+  deleteMemoAction,
+  updateMemoAction,
+  type Memo,
+} from '@/actions/memo-actions'
+import { toast } from 'sonner'
 
 interface Props {
-  errorMessage?: string | string[]
+  memo: Memo
 }
 
-export default async function MemoForm({ errorMessage }: Props) {
-  // 오류 원인
-  // 일반 서버 컴포넌트 (페이지 컴포넌트가 아님. 검색 매개변수 못 읽음)
-
-  // 오류 해결 방법
-  // 1. 서버 컴포넌트: 부모(페이지) 컴포넌트 -> 폼 컴포넌트 error prop 전달 ✅
-  // 2. 클라이언트 컴포넌트화 (useSearchParams 훅)
+export default function MemoItem({ memo }: Props) {
+  const [isEditing, setIsEditing] = useState(false)
+  const [title, setTitle] = useState(memo?.title)
+  const [content, setContent] = useState(memo?.content)
 
   /**
-   * createMemoAction 서버 액션을 정의합니다.
-   * createMemoAction 서버 액션을 <form> 요소의 action 속성에 연결합니다.
-   * 서버 컴포넌트에서 서버 액션을 처리하도록 구성하고, 생성과 동시에 화면이 업데이트되도록 구성합니다.
-   * 클라이언트 컴포넌트에서 각 필드마다 에러 메시지를 표시하도록 구성합니다.
+   * updateMemoAction 서버 액션을 정의합니다.
+   * 서버 액션을 사용해 수정한 후, 화면을 즉시 업데이트합니다.
    */
+  const updateMemo = () => {
+    // console.log('메모 수정 기능')
 
-  // 인라인 서버 액션 (Server Action)
-  const handleAction = async (formData: FormData) => {
-    'use server'
+    startTransition(async () => {
+      const result = await updateMemoAction(memo.id, { title, content })
+      if (!result.success) toast.error(result.error)
+      else toast.success('메모 수정에 성공했습니다.')
+      setIsEditing(false) // 에디트 모드 OFF
+    })
+  }
 
-    const result = await createMemoAction(formData)
+  /**
+   * deleteMemoAction 서버 액션을 정의합니다.
+   * 서버 액션을 사용해 수정한 후, 화면을 즉시 업데이트합니다.
+   */
+  const deleteMemo = (memoId: Memo['id']) => {
+    // console.log('메모 삭제 기능')
 
-    if (!result.success) {
-      // Next.js의 서버 함수
-      // 페이지 리디렉션(redirection)
-      redirect(`?error=${encodeURIComponent(result.error)}`)
-    } else {
-      redirect('/memos-crud')
-    }
+    startTransition(async () => {
+      const result = await deleteMemoAction(memoId)
+      if (!result.success) toast.error(result.error)
+      else toast.success('메모 삭제에 성공했습니다.')
+    })
   }
 
   return (
-    <form action={handleAction} className="flex flex-col gap-3">
-      <input
-        type="text"
-        name="title"
-        aria-label="메모 제목"
-        placeholder="메모 제목 (2글자 이상 입력)"
-        required
-        className="rounded-xl border border-slate-200 px-4 py-2"
-      />
-      <textarea
-        name="content"
-        aria-label="메모 내용"
-        placeholder="메모 내용 작성 (최대 100글자)"
-        required
-        rows={3}
-        className="min-h-40 rounded-xl border border-slate-200 px-4 py-2"
-      />
-      <button
-        type="submit"
-        className="cursor-pointer rounded-xl bg-slate-900 py-2.5 font-bold text-white"
-      >
-        메모 저장
-      </button>
-      {errorMessage && errorMessage.length > 0 && (
-        <p role="alert" className="px-3 py-1 font-medium text-red-700">
-          {decodeURIComponent(errorMessage?.toString())}
-        </p>
+    <article
+      className={cn(
+        'group relative rounded-3xl border-2 p-6 transition-all',
+        isEditing
+          ? 'border-slate-900 bg-white shadow-lg'
+          : 'border-slate-100 bg-white hover:border-slate-200',
       )}
-    </form>
+    >
+      <div className="flex items-start justify-between">
+        <div className="flex w-full gap-4">
+          <div
+            className={cn(
+              'flex size-10 shrink-0 items-center justify-center rounded-xl transition-colors',
+              isEditing
+                ? 'bg-slate-900 text-white'
+                : 'bg-slate-50 text-slate-400 group-hover:bg-slate-900 group-hover:text-white',
+            )}
+          >
+            <LucideStickyNote className="size-5" />
+          </div>
+
+          <div className="w-full pr-8">
+            {isEditing ? (
+              <>
+                {/* 수정 모드 ON */}
+                <div className="flex flex-col gap-2">
+                  <input
+                    value={title}
+                    onChange={(e) => setTitle(e.target.value)}
+                    className="w-full rounded-lg border border-slate-200 px-3 py-1 font-bold text-slate-900 focus:ring-2 focus:ring-slate-900 focus:outline-none"
+                  />
+                  <textarea
+                    value={content}
+                    onChange={(e) => setContent(e.target.value)}
+                    rows={3}
+                    className="w-full rounded-lg border border-slate-200 px-3 py-2 text-sm text-slate-600 focus:ring-2 focus:ring-slate-900 focus:outline-none"
+                  />
+                </div>
+              </>
+            ) : (
+              <>
+                {/* 수정 모드 OFF */}
+                <h3 className="font-bold text-slate-900">{memo?.title}</h3>
+                <p className="mt-1 text-sm text-slate-600">{memo?.content}</p>
+              </>
+            )}
+
+            <div className="mt-3 flex items-center gap-2 text-[10px] font-bold text-slate-400">
+              <LucideCalendar className="size-3" />
+              {new Date(memo?.created_at ?? '').toLocaleString('ko-KR')}
+            </div>
+          </div>
+        </div>
+
+        <div className="flex shrink-0 flex-col gap-2">
+          {isEditing ? (
+            <>
+              {/* 수정 모드 ON */}
+              <button
+                type="button"
+                aria-label="수정 확인"
+                onClick={() => updateMemo()}
+                className="cursor-pointer rounded-lg p-2 text-emerald-500 hover:bg-emerald-50"
+              >
+                <LucideCheck className="size-5" />
+              </button>
+              <button
+                type="button"
+                aria-label="수정 취소"
+                onClick={() => setIsEditing(false)}
+                className="cursor-pointer rounded-lg p-2 text-slate-400 hover:bg-slate-50"
+              >
+                <LucideX className="size-5" />
+              </button>
+            </>
+          ) : (
+            <>
+              {/* 수정 모드 OFF */}
+              <button
+                type="button"
+                aria-label="수정 모드 전환"
+                onClick={() => setIsEditing(true)}
+                className="cursor-pointer rounded-lg p-2 text-slate-300 hover:bg-slate-50 hover:text-slate-600"
+              >
+                <LucideEdit3 className="size-5" />
+              </button>
+              <button
+                type="button"
+                aria-label="삭제"
+                onClick={() => deleteMemo(memo.id)}
+                className="cursor-pointer rounded-lg p-2 text-slate-300 hover:bg-rose-50 hover:text-rose-500"
+              >
+                <LucideTrash2 className="size-5" />
+              </button>
+            </>
+          )}
+        </div>
+      </div>
+    </article>
   )
 }
