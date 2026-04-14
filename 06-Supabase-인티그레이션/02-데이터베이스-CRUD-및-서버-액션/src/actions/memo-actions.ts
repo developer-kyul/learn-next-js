@@ -4,6 +4,7 @@ import { revalidatePath } from 'next/cache'
 
 import { getErrorMessage } from '@/utils'
 import { createSupabase } from '@/lib/supabase/helpers'
+import z from 'zod'
 
 /* DB 테이블 이름 및 갱신할 페이지 경로 정의 ------------------------------------------- */
 
@@ -34,6 +35,24 @@ export type ActionResponse<T> =
       error: string
     }
 
+/* 메모 생성 스키마 --------------------------------------------------------------- */
+
+const CreateMemoSchema = z.object({
+  title: z
+    .string()
+    .trim()
+    .min(2, '메모 제목은 최소 2글자 이상 입력해야 합니다.')
+    .max(16, '메모 제목은 최대 16글자까지만 입력 가능합니다.'),
+  content: z
+    .string()
+    .trim()
+    .min(5, '메모 내용은 최소 5글자 이상 입력해야 합니다.')
+    .max(100, '메모 내용은 최대 100글자로 작성해야 합니다.'),
+})
+
+// 메모 생성 폼의 상태 타입
+export type CreateMemoFormState = z.infer<typeof CreateMemoSchema>
+
 /* 서버 액션 (Actions) ---------------------------------------------------------- */
 
 /**
@@ -48,17 +67,27 @@ export const createMemoAction = async (
   const content = formData.get('content')?.toString().trim()
 
   // 서버 측 유효성 검사: 예측 가능한 에러 (사용자 실수)
-  if (!title || !content) {
-    // Supabase 데이터베이스에 연결할 필요없이 바로 실패 응답 결과 반환
+  // Zod를 사용한 입력 값 검증(Safe Parse -> Validation)
+  const result = CreateMemoSchema.safeParse({ title, content })
+
+  // Supabase 데이터베이스에 연결할 필요없이 바로 실패 응답 결과 반환
+  if (!result.success) {
+    // 각 필드마다 에러를 표시하고자 할 경우 (클라이언트 화면용)
+    // const treeifyError = z.treeifyError(result.error)
+    // console.log(treeifyError)
+
+    // 전체 에러 메시지를 화면에 표시할 경우 (서버 터미널 디버깅용)
+    const prettifyError = z.prettifyError(result.error)
+
     return {
       success: false,
-      error: '메모 제목과 내용을 입력해야 합니다.',
+      error: prettifyError,
     }
   }
 
   try {
     const supabase = await createSupabase()
-    const newMemo: MemoInsert = { title, content }
+    const newMemo: MemoInsert = result.data
 
     const { error, data } = await supabase
       .from(DB_NAME) // DB에서

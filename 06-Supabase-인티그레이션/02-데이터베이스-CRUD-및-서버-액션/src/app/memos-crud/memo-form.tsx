@@ -1,5 +1,6 @@
-export default function MemoForm() {
+import { createMemoAction } from '@/actions/memo-actions'
 
+export default function MemoForm() {
   /**
    * createMemoAction 서버 액션을 정의합니다.
    * createMemoAction 서버 액션을 <form> 요소의 action 속성에 연결합니다.
@@ -7,8 +8,21 @@ export default function MemoForm() {
    * 클라이언트 컴포넌트에서 각 필드마다 에러 메시지를 표시하도록 구성합니다.
    */
 
+  // 인라인 서버 액션 (Server Action)
+  const handleAction = async (formData: FormData) => {
+    'use server'
+
+    const result = await createMemoAction(formData)
+
+    if (!result.success) {
+      console.error(result.error)
+    } else {
+      console.log(result.data)
+    }
+  }
+
   return (
-    <form className="flex flex-col gap-3">
+    <form action={handleAction} className="flex flex-col gap-3">
       <input
         type="text"
         name="title"
@@ -27,7 +41,7 @@ export default function MemoForm() {
       />
       <button
         type="submit"
-        className="rounded-xl bg-slate-900 py-2.5 font-bold text-white"
+        className="cursor-pointer rounded-xl bg-slate-900 py-2.5 font-bold text-white"
       >
         메모 저장
       </button>
